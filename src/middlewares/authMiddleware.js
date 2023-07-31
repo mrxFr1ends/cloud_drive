@@ -14,8 +14,6 @@ export const authMiddleware = (req, res, next) => {
         req.tokenData = decoded;
         next();
     } catch (err) { 
-        if (err.name === 'TokenExpiredError')
-            return res.status(403).send({message: "Error verifying token"});
-        throw err;
+        return res.status(403).send({message: "Error verifying token"});
     }
 };

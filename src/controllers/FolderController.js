@@ -12,7 +12,7 @@ class FolderController {
             return res.status(403).send({message: "No access to folder"});
 
         const folder = await Folder.create({ ownerId: req.user._id, name, parentId });
-        res.send(folder);
+        res.status(201).send(folder);
     };
 
     async getByIdOrToken(req, res) {

@@ -35,7 +35,7 @@ class UploadController {
             ? uploadedFiles.map(async file => await uploadFile(file)) 
             : [await uploadFile(uploadedFiles)];
     
-        res.send({ 
+        res.status(201).send({ 
             files: await File.find({
                 _id: { $in: [filesMetadata.map(data => data.id)]}
             }).populate('metadata', '-_id -chunkSize')

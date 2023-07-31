@@ -20,14 +20,14 @@ class UserController {
     async register(req, res) {
         const { username, email, password } = req.body;
         if (await UserService.getByNameOrEmail(username, email))
-            return res.status(400).json({message: `User with email '${email}' or username '${username}' already exist`});
+            return res.status(409).json({message: "User with this email or username already exists"});
 
         const hashPassword = await getPasswordHash(password);
         const user = await UserService.create(username, email, hashPassword);
 
         await Folder.create({ _id: user._id, name: user._id, ownerId: user._id });
 
-        return res.json(getResponseWithToken(user));
+        return res.status(201).json(getResponseWithToken(user));
     }
 
     async login(req, res) {
