@@ -17,7 +17,7 @@ diskRouter.use(asyncHandler(async (req, res, next) => {
 }));
 
 diskRouter.get('/file/:id', asyncHandler(FileController.getOne));
-diskRouter.put('/file/:id', asyncHandler(FileController.moveToTrash));
+diskRouter.put('/file', asyncHandler(FileController.update));
 diskRouter.delete('/file/:id', asyncHandler(FileController.delete));
 
 diskRouter.post('/folder', asyncHandler(FolderController.create));
@@ -30,12 +30,5 @@ diskRouter.post('/upload/folder', asyncHandler(UploadController.uploadFolder));
 
 diskRouter.get('/download/file/:id', asyncHandler(DownloadController.downloadFile));
 diskRouter.get('/download/folder/:id', asyncHandler(DownloadController.downloadFolder));
-
-
-// diskRouter.get(['/', '/folder/:id'], asyncHandler(FolderController.getByIdOrToken));
-// diskRouter.post('/folder', asyncHandler(FolderController.create));
-// diskRouter.post('/file', asyncHandler(UploadController.uploadFiles));
-// diskRouter.get('/file/:id', asyncHandler(DownloadController.downloadFile));
-// diskRouter.get('/files/:folderId', asyncHandler(DownloadController.downloadFolder));
 
 export default diskRouter;

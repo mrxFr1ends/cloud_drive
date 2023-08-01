@@ -47,7 +47,21 @@ class FolderController {
         if (!folder.ownerId.equals(req.user._id))
             return res.status(403).send({message: "No access to folder"});
             
-        folder.set({name, trashed})
+        const parentFolder = await Folder.findById(folder.parentId);
+        if (parentFolder && parentFolder.trashed)
+            return res.status(403).send({message: "Folder in trashed folder and cannot be changed"});
+
+        if (folder.trashed !== trashed && trashed !== undefined) {
+            folder.set({ 
+                parentId: parentFolder && !trashed ? parentFolder.id : null, 
+                prevParentId: trashed ? folder.parentId : null, 
+                trashed
+            });
+        }
+
+        if (name !== undefined)
+            folder.set({ name });
+
         folder.save().then(savedFolder => res.send(savedFolder));
     }
 
