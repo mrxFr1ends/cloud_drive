@@ -66,7 +66,16 @@ class FolderController {
     }
 
     async delete(req, res) {
-        res.send('Delete folder' + req.params.id);
+        const { id } = req.params;
+
+        const folder = await Folder.findById(id);
+        if (!folder)
+            return res.status(404).send({message: "Folder not found"});
+        if (!folder.ownerId.equals(req.user._id))
+            return res.status(403).send({message: "No access to folder"});
+
+        await folder.deleteOne();
+        res.sendStatus(200);
     }
 }
 
