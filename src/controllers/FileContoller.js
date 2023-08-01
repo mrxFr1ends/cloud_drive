@@ -47,7 +47,20 @@ class FileController {
     }
 
     async delete(req, res) {
-        res.send('Delete file' + req.params.id);
+        const { id } = req.params;
+
+        const file = await File.findById(id);
+        if (!file)
+            return res.status(404).send({message: "File not found"});
+        if (!file.ownerId.equals(req.user._id))
+            return res.status(403).send({message: "No access to file"});
+
+        const bucket = new mongoose.mongo.GridFSBucket(mongoose.connection.db, {        
+            bucketName: 'files'
+        });
+        await bucket.delete(file.metadata);
+        await file.deleteOne();
+        res.sendStatus(200);
     }
 }
 
