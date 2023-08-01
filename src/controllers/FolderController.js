@@ -1,5 +1,6 @@
 import Folder from "../models/Folder.js";
 import File from "../models/File.js";
+import mongoose from "mongoose";
 
 class FolderController {
     async create(req, res) {
@@ -28,8 +29,26 @@ class FolderController {
         res.send({ folder, folders, files });
     };
 
-    async moveToTrash(req, res) {
-        res.send('Move folder to trash: ' + req.params.id);
+    async update(req, res) {
+        // TODO: добавить валидаторы
+        // При перемещении в корзину
+        // Присваиваем trashed = true и делаем parentId = user.id при этом нахо хранить id старого родителя
+        // Для всех внутренних папок и файлов, делаем trashed = true и оставляем того же родителя
+        // При восстановлении если папки со старым id не найдено, то присваиваем parentId = user.id и trashed = true
+        const { id, trashed, name } = req.body;
+        if (!id)
+            return res.status(400).send({message: 'Invalid folder id'});
+        if (trashed !== undefined && trashed !== false && trashed !== true)
+            return res.status(400).send({message: 'Invalid trashed value'});
+
+        const folder = await Folder.findById(id);
+        if (!folder)
+            return res.status(404).send({message: "Folder not found"});
+        if (!folder.ownerId.equals(req.user._id))
+            return res.status(403).send({message: "No access to folder"});
+            
+        folder.set({name, trashed})
+        folder.save().then(savedFolder => res.send(savedFolder));
     }
 
     async delete(req, res) {

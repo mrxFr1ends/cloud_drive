@@ -20,6 +20,15 @@ const File = new mongoose.Schema({
         ref: 'FileMetadata',
         required: true,
         unique: true
+    },
+    trashed: {
+        type: Boolean,
+        default: false
+    },
+    prevParentId: {
+        type: mongoose.Types.ObjectId,
+        ref: 'Folder',
+        default: null
     }
 });
 
