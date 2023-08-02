@@ -1,11 +1,11 @@
 import express from 'express';
 import { asyncHandler } from '../../helpers/asyncHandler.js'
 import UserService from '../../services/UserService.js';
-import FileController from '../../controllers/FileContoller.js';
+import FileController from '../../controllers/FileController.js';
 import FolderController from '../../controllers/FolderController.js';
 import DownloadController from '../../controllers/DownloadController.js';
 import UploadController from '../../controllers/UploadController.js';
-import {validateMiddleware} from '../../middlewares/validateMiddleware.js';
+import { validateMiddleware } from '../../middlewares/validateMiddleware.js';
 import * as rules from '../../validators/folder.validator.js';
 const diskRouter = new express.Router();
 

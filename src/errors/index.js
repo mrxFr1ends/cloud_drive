@@ -18,3 +18,11 @@ export class FolderInTrashError extends AppError {
 export class RootFolderError extends AppError {
     constructor() { super('Root folder cannot be changed/deleted', 403); }
 }
+
+export class FileNotFoundError extends AppError {
+    constructor() { super('File not found', 404); }
+}
+
+export class FileInTrashError extends AppError {
+    constructor() { super('File in trash', 403); }
+}
