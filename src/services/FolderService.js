@@ -1,5 +1,6 @@
 import Folder from '../models/Folder.js';
-import { FolderNotFoundError } from '../errors/index.js';
+import { FolderInTrashError, FolderNotFoundError } from '../errors/index.js';
+import FolderService from './FolderService.js';
 
 class FolderService {
     async create(name, parentId, ownerId) {
@@ -39,10 +40,18 @@ class FolderService {
             }
         } 
 
-        if (name !== undefined)
+        if (name !== undefined) {
+            if (folder.trashed)
+                throw new FolderInTrashError();
             folder.set({ name });
+        }
 
         return await folder.save();
+    }
+
+    async deleteById(id, ownerId) {
+        const folder = await this.getById(id, ownerId);
+        await folder.deleteOne();
     }
 }
 

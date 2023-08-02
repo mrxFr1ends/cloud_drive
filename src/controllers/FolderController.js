@@ -37,8 +37,7 @@ class FolderController {
         if (id === req.user._id.toString())
             throw new RootFolderError();
 
-        const folder = await FolderService.getById(id, req.user._id);
-        await folder.deleteOne();
+        await FolderService.deleteById(id, req.user._id);
         res.sendStatus(200);
     }
 }
