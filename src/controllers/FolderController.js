@@ -1,5 +1,5 @@
 import File from "../models/File.js";
-import { FolderNotFoundError, FolderInTrashError } from "../errors/index.js";
+import { FolderNotFoundError, FolderInTrashError, RootFolderError } from "../errors/index.js";
 import FolderService from "../services/FolderService.js";
 
 // TODO: добавить валидаторы
@@ -30,7 +30,9 @@ class FolderController {
 
     async update(req, res) {
         const { id, trashed, name } = req.body;
-        
+        if (id === req.user._id.toString())
+            throw new RootFolderError();
+
         const folder = await FolderService.getById(id, req.user._id);
         if (!folder) throw new FolderNotFoundError();
 
@@ -40,6 +42,8 @@ class FolderController {
 
     async delete(req, res) {
         const id = req.params.id;
+        if (id === req.user._id.toString())
+            throw new RootFolderError();
 
         const folder = await FolderService.getById(id, req.user._id);
         if (!folder) throw new FolderNotFoundError();

@@ -14,3 +14,7 @@ export class FolderNotFoundError extends AppError {
 export class FolderInTrashError extends AppError {
     constructor() { super('Folder in trash', 403); }
 }
+
+export class RootFolderError extends AppError {
+    constructor() { super('Root folder cannot be changed/deleted', 403); }
+}
