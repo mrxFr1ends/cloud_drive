@@ -53,20 +53,21 @@ FolderSchema.pre('save', async function(next) {
 FolderSchema.pre('deleteOne', { document: true }, async function(next) {
     console.log('deleteOne', this.name);
     
-    await Folder.find({ parentId: this.id }).then(async (folders) => {
-        await Promise.all(folders.map(async (folder) => {
-            console.log(folder.name);
-            await folder.deleteOne();
-        }));
-    });
+    await Folder.find({ parentId: this.id })
+        .then(folders => 
+            Promise.all(folders.map(async (folder) => {
+                console.log(folder.name);
+                await folder.deleteOne();
+            }))
+        );
 
-    await File.find({ parentId: this.id }).then(async (files) => {
+    await File.find({ parentId: this.id }).then(files => {
         if (files.length === 0)
             return;
         const bucket = new mongoose.mongo.GridFSBucket(mongoose.connection.db, {        
             bucketName: 'files'
         });
-        await Promise.all(files.map(async (file) => {
+        return Promise.all(files.map(async (file) => {
             await bucket.delete(file.metadata)
             console.log('delete file', file.id);
             await file.deleteOne();

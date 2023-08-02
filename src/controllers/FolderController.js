@@ -1,105 +1,48 @@
-import Folder from "../models/Folder.js";
 import File from "../models/File.js";
-import mongoose from "mongoose";
+import { FolderNotFoundError, FolderInTrashError } from "../errors/index.js";
+import FolderService from "../services/FolderService.js";
+
+// TODO: добавить валидаторы
 
 class FolderController {
     async create(req, res) {
         const { name, parentId } = req.body;
 
-        const parentFolder = await Folder.findById(parentId);
-        if (!parentFolder)
-            return res.status(404).send({message: "Folder not found"});
-        if (!parentFolder.ownerId.equals(req.user._id))
-            return res.status(403).send({message: "No access to folder"});
+        const parentFolder = await FolderService.getById(parentId, req.user._id);
+        if (!parentFolder) throw new FolderNotFoundError();
+        if (parentFolder.trashed) throw new FolderInTrashError();
 
-        const folder = await Folder.create({ ownerId: req.user._id, name, parentId });
+        const folder = await FolderService.create(name, parentId, req.user._id);
         res.status(201).send(folder);
     };
 
-    async getById(req, res) {
-        const folderId = req.params.id;
-        const folder = await Folder.findById(folderId);
-        if (!folder)
-            return res.status(404).send({message: "Folder not found"});
-        if (!folder.ownerId.equals(req.user._id))
-            return res.status(403).send({message: "No access to folder"});
-        if (folder.trashed)
-            return res.status(403).send({message: "Folder in trash"});
-            
-        const folders = await Folder.find({ parentId: folderId });
-        const files = await File.find({ parentId: folderId }).populate('metadata', '-_id -chunkSize');
+    async getByIdOrToken(req, res) {
+        const id = req.params.id ? req.params.id : req.user._id;
+
+        const folder = await FolderService.getById(id, req.user._id);
+        if (!folder) throw new FolderNotFoundError();
+
+        const trashed = req.query.filter === 'trashed';
+        const folders = await FolderService.getByParentId(id, req.user._id, trashed);
+        const files = await File.find({ parentId: id, trashed }).populate('metadata', '-_id -chunkSize');
         res.send({ folder, folders, files });
     };
 
-    async getByToken(req, res) {
-        const folderId = req.user._id;
-        const folder = await Folder.findById(folderId);
-        if (!folder)
-            return res.status(404).send({message: "Folder not found"});
-        if (!folder.ownerId.equals(req.user._id))
-            return res.status(403).send({message: "No access to folder"});
-
-        const trashed = req.query.filter === 'trashed';
-        const folders = await Folder.find({ parentId: folderId, trashed });
-        const files = await File.find({ parentId: folderId, trashed }).populate('metadata', '-_id -chunkSize');
-        res.send({ folder, folders, files });
-    }
-
     async update(req, res) {
-        // TODO: добавить валидаторы
-        // При перемещении в корзину
-        // Присваиваем trashed = true и делаем parentId = user.id при этом нахо хранить id старого родителя
-        // Для всех внутренних папок и файлов, делаем trashed = true и оставляем того же родителя
-        // При восстановлении если папки со старым id не найдено, то присваиваем parentId = user.id и trashed = true
         const { id, trashed, name } = req.body;
         
-        if (!id)
-            return res.status(400).send({message: 'Invalid folder id'});
-        if (trashed !== undefined && trashed !== false && trashed !== true)
-            return res.status(400).send({message: 'Invalid trashed value'});
+        const folder = await FolderService.getById(id, req.user._id);
+        if (!folder) throw new FolderNotFoundError();
 
-        const folder = await Folder.findById(id);
-        if (!folder)
-            return res.status(404).send({message: "Folder not found"});
-        if (!folder.ownerId.equals(req.user._id))
-            return res.status(403).send({message: "No access to folder"});
-            
-        const parentFolder = await Folder.findById(folder.parentId);
-        if (parentFolder.trashed)
-            return res.status(403).send({message: "Folder in trashed folder and cannot be changed"});
-
-        if (folder.trashed !== trashed && trashed !== undefined) {
-            if (trashed) {
-                folder.set({
-                    prevParentId: folder.parentId,
-                    parentId: req.user._id,
-                    trashed: true
-                });
-            }
-            else {
-                const prevParentFolder = await Folder.findById(folder.prevParentId);
-                folder.set({
-                    parentId: prevParentFolder ? folder.prevParentId : req.user._id,
-                    prevParentId: null,
-                    trashed: false
-                });
-            }
-        } 
-
-        if (name !== undefined)
-            folder.set({ name });
-
-        folder.save().then(savedFolder => res.send(savedFolder));
+        const updatedFolder = await FolderService.update(folder, trashed, name, req.user._id);
+        res.send(updatedFolder);
     }
 
     async delete(req, res) {
-        const { id } = req.params;
+        const id = req.params.id;
 
-        const folder = await Folder.findById(id);
-        if (!folder)
-            return res.status(404).send({message: "Folder not found"});
-        if (!folder.ownerId.equals(req.user._id))
-            return res.status(403).send({message: "No access to folder"});
+        const folder = await FolderService.getById(id, req.user._id);
+        if (!folder) throw new FolderNotFoundError();
 
         await folder.deleteOne();
         res.sendStatus(200);

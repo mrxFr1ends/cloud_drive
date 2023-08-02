@@ -33,6 +33,12 @@ app.use(serverErrorMiddleware);
 // в Folder pre updateMany для удаления Folder и File.
 // В File pre updateMany для удаления FileMetadata. 
 
+// TODO: В идеале сделать pre deleteMany и pre deleteOne у File. 
+// TODO: в deleteMany вызывать deleteOne. В deleteOne вызывать удаление metadata
+// TODO: в deleteMany Folder вызывать deleteOne Folder
+// TODO: в deleteOne Folder вызывать deleteMany по parentId у Folder и File.
+// TODO: это удобно т.к. удаление файла можно сделать просто как file.deleteOne и знать что 100% metadata так же удалится
+
 async function startApp() {
     try {
         // Connect to DB
