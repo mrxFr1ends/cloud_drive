@@ -25,7 +25,7 @@ class UserController {
         const hashPassword = await getPasswordHash(password);
         const user = await UserService.create(username, email, hashPassword);
 
-        await Folder.create({ _id: user._id, name: user._id, ownerId: user._id });
+        await Folder.create({ _id: user._id, name: "root", ownerId: user._id });
 
         return res.status(201).json(getResponseWithToken(user));
     }
