@@ -29,12 +29,22 @@ class FileController {
             return res.status(403).send({message: "File in trashed folder and cannot be changed"});
 
         if (file.trashed !== trashed && trashed !== undefined) {
-            await file.updateOne({ 
-                parentId: parentFolder && !trashed ? parentFolder.id : null, 
-                prevParentId: trashed ? file.parentId : null, 
-                trashed 
-            });
-        }
+            if (trashed) {
+                await file.updateOne({
+                    prevParentId: file.parentId,
+                    parentId: req.user._id,
+                    trashed: true
+                });
+            }
+            else {
+                const prevParentFolder = await Folder.findById(file.prevParentId);
+                await file.updateOne({
+                    parentId: prevParentFolder ? file.prevParentId : req.user._id,
+                    prevParentId: null,
+                    trashed: false
+                });
+            }
+        } 
 
         if (name !== undefined) {
             const bucket = new mongoose.mongo.GridFSBucket(mongoose.connection.db, {        

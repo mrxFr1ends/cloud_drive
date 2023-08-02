@@ -21,7 +21,8 @@ diskRouter.put('/file', asyncHandler(FileController.update));
 diskRouter.delete('/file/:id', asyncHandler(FileController.delete));
 
 diskRouter.post('/folder', asyncHandler(FolderController.create));
-diskRouter.get(['/folder', '/folder/:id'], asyncHandler(FolderController.getByIdOrToken));
+diskRouter.get('/folder', asyncHandler(FolderController.getByToken))
+diskRouter.get('/folder/:id', asyncHandler(FolderController.getById));
 diskRouter.put('/folder', asyncHandler(FolderController.update));
 diskRouter.delete('/folder/:id', asyncHandler(FolderController.delete));
 

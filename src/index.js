@@ -30,6 +30,9 @@ app.use(serverErrorMiddleware);
 // TODO: или все добавлять в конце. Решение может быть таким. Не использовать
 // TODO: create, а использовать new User а потом уже user.save() 
 
+// в Folder pre updateMany для удаления Folder и File.
+// В File pre updateMany для удаления FileMetadata. 
+
 async function startApp() {
     try {
         // Connect to DB
