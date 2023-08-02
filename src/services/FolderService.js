@@ -1,4 +1,5 @@
 import Folder from '../models/Folder.js';
+import {FolderNotFoundError} from '../errors/index.js';
 
 class FolderService {
     async create(name, parentId, ownerId) {
@@ -8,6 +9,7 @@ class FolderService {
 
     async getById(id, userId) {
         const folder = await Folder.findOne({ _id: id, ownerId: userId });
+        if (!folder) throw new FolderNotFoundError();
         return folder;
     }
 
@@ -20,7 +22,9 @@ class FolderService {
         return folders;
     }
 
-    async update(folder, trashed, name, userId) {
+    async update(id, trashed, name, userId) {
+        const folder = await this.getById(id, userId);
+
         if (folder.trashed !== trashed && trashed !== undefined) {
             if (trashed) {
                 folder.set({
@@ -30,7 +34,7 @@ class FolderService {
                 });
             }
             else {
-                const prevParentFolder = await this.getById(folder.prevParentId);
+                const prevParentFolder = await this.getById(folder.prevParentId).then(folder => folder).catch(_ => null);
                 folder.set({
                     parentId: prevParentFolder ? folder.prevParentId : userId,
                     prevParentId: null,

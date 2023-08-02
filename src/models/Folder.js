@@ -53,7 +53,7 @@ FolderSchema.pre('save', async function(next) {
 FolderSchema.pre('deleteOne', { document: true }, async function(next) {
     console.log('deleteOne', this.name);
     
-    await Folder.find({ parentId: this.id })
+    await Folder.find({ parentId: this.id, trashed: this.trashed })
         .then(folders => 
             Promise.all(folders.map(async (folder) => {
                 console.log(folder.name);
@@ -61,7 +61,7 @@ FolderSchema.pre('deleteOne', { document: true }, async function(next) {
             }))
         );
 
-    await File.find({ parentId: this.id }).then(files => {
+    await File.find({ parentId: this.id, trashed: this.trashed }).then(files => {
         if (files.length === 0)
             return;
         const bucket = new mongoose.mongo.GridFSBucket(mongoose.connection.db, {        
