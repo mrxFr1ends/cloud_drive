@@ -1,17 +1,12 @@
 import mongoose from 'mongoose';
 import archiver from 'archiver';
-import File from '../models/File.js';
-import Folder from '../models/Folder.js';
+import FileService from '../services/FileService.js';
+import FolderService from '../services/FolderService.js';
 
 class DownloadController {
     async downloadFile(req, res) {
-        const _id = new mongoose.Types.ObjectId(req.params.id);
-        const file = await File.findById(_id);
-        if (!file)
-            return res.status(404).send({message: 'File not found'});
-        if (!file.ownerId.equals(req.user._id))
-            return res.status(403).send({message: 'No access to file'});
-
+        const id = req.params.id;
+        const file = await FileService.getById(id, req.user._id, false);
         const bucket = new mongoose.mongo.GridFSBucket(mongoose.connection.db, {
             bucketName: 'files'
         });
@@ -19,22 +14,14 @@ class DownloadController {
     }
 
     async downloadFolder(req, res) {
-        const folderId = req.params.id;
-        const folder = await Folder.findById(folderId);
-        if (!folder)
-            return res.status(404).send({message: 'Folder not found'});
-        if (!folder.ownerId.equals(req.user._id))
-            return res.status(403).send({message: "No access to folder"});
-
-        const metadataIds = await File.find({ parentId: folderId }).select('metadata')
-            .then(ids => ids.map(id => id.metadata));
-        // if (metadataIds.length === 0)
-        //     return res.status(404).send("Files not found");
-
+        const id = req.params.id;
+        const folder = await FolderService.getById(id, req.user._id);
+        const metadataIds = await FileService.getByParentId(id, req.user._id)
+            .then(files => files.map(file => file.metadata));
         const bucket = new mongoose.mongo.GridFSBucket(mongoose.connection.db, {
             bucketName: 'files'
         });
-        const files = await bucket.find({ _id: {$in: metadataIds} }).toArray();
+        const files = await bucket.find({ _id: { $in: metadataIds } }).toArray();
             
         res.set("Content-Type", "application/zip");
         res.set("Content-Disposition", `attachment; filename=${folder.name}.zip`);

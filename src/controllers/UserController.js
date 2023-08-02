@@ -1,6 +1,6 @@
 import { generateAuthToken } from '../helpers/jwt.js';
 import { getPasswordHash, comparePassword } from '../helpers/passwordHash.js';
-import Folder from '../models/Folder.js';
+import FolderService from '../services/FolderService.js';
 import UserService from '../services/UserService.js';
 
 const getResponseWithToken = (user) => {
@@ -25,7 +25,7 @@ class UserController {
         const hashPassword = await getPasswordHash(password);
         const user = await UserService.create(username, email, hashPassword);
 
-        await Folder.create({ _id: user._id, name: "root", ownerId: user._id });
+        await FolderService.createRoot(user._id);
 
         return res.status(201).json(getResponseWithToken(user));
     }

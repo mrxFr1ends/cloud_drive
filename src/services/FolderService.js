@@ -1,10 +1,18 @@
 import Folder from '../models/Folder.js';
 import { FolderInTrashError, FolderNotFoundError } from '../errors/index.js';
-import FolderService from './FolderService.js';
 
 class FolderService {
     async create(name, parentId, ownerId) {
         const folder = await Folder.create({ name, parentId, ownerId });
+        return folder;
+    }
+
+    async createRoot(ownerId) {
+        const folder = await Folder.create({ 
+            _id: ownerId, 
+            name: "root",
+            ownerId
+        });
         return folder;
     }
 

@@ -1,23 +1,31 @@
 import File from '../models/File.js';
 import { FileInTrashError, FileNotFoundError } from '../errors/index.js';
-import FileService from './FileService.js';
 import mongoose from 'mongoose';
 import FolderService from './FolderService.js';
 
 class FileService {
-    async create(name, parentId, ownerId) { }
+    async create(parentId, metadataId, ownerId) { 
+        const file = await File.create({ parentId, metadata: metadataId, ownerId });
+        return file;
+    }
 
     async getById(id, ownerId, metadata=true) {
-        const file = await File.findOne({ _id: id, ownerId });
-        if (!file) throw new FileNotFoundError();
-        if (metadata) await file.populate('metadata', '-_id -chunkSize');
+        const file = File.findOne({ _id: id, ownerId });
+        if (metadata) file.populate('metadata', '-_id -chunkSize');
+        if (!(await file)) throw new FileNotFoundError();
         return file;
     }
 
     async getByParentId(parentId, trashed, ownerId, metadata=true) {
-        const files = await File.find({ parentId, ownerId, trashed });
-        if (metadata) await files.populate('metadata', '-_id -chunkSize');
-        return files;
+        const files = File.find({ parentId, ownerId, trashed });
+        if (metadata) files.populate('metadata', '-_id -chunkSize');
+        return await files;
+    }
+
+    async getManyById(ids, ownerId, metadata=true) {
+        const files = File.find({ _id: { $in: ids }, ownerId })
+        if (metadata) files.populate('metadata', '-_id -chunkSize');
+        return await files;
     }
 
     async update(id, trashed, name, ownerId) {

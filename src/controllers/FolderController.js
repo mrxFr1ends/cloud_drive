@@ -1,6 +1,6 @@
-import File from "../models/File.js";
 import { FolderInTrashError, RootFolderError } from "../errors/index.js";
 import FolderService from "../services/FolderService.js";
+import FileService from "../services/FileService.js";
 
 class FolderController {
     async create(req, res) {
@@ -19,7 +19,7 @@ class FolderController {
         res.send({ 
             folder: await FolderService.getById(id, req.user._id), 
             subfolders: await FolderService.getByParentId(id, trashed, req.user._id), 
-            files: await File.find({ parentId: id, trashed }).populate('metadata', '-_id -chunkSize')
+            files: await FileService.getByParentId(id, trashed, req.user._d)
         });
     };
 
