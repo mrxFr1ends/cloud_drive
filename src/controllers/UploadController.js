@@ -19,22 +19,30 @@ class UploadController {
             bucketName: 'files'
         });
     
-        const uploadFile = async (file) => {
+        const uploadFile = (file) => new Promise((resolve, reject) => {
             const readStream = stream.PassThrough();
             readStream.end(file.data); 
             const uploadStream = bucket.openUploadStream(file.name);
             readStream.pipe(uploadStream);
-            return await File.create({ 
-                ownerId: req.user._id, 
-                parentId: folderId, 
-                metadata: uploadStream.id 
+
+            uploadStream.on('finish', async () => {
+                try {
+                    resolve(await File.create({ 
+                        ownerId: req.user._id, 
+                        parentId: folderId, 
+                        metadata: uploadStream.id 
+                    }));
+                }
+                catch (err) { reject(err); }
             });
-        }
-    
+
+            uploadStream.on('error', reject);
+        });
+
         const filesMetadata = Array.isArray(uploadedFiles) 
-            ? uploadedFiles.map(async file => await uploadFile(file)) 
+            ? await Promise.all(uploadedFiles.map(file => uploadFile(file)))
             : [await uploadFile(uploadedFiles)];
-    
+
         res.status(201).send({ 
             files: await File.find({
                 _id: { $in: [filesMetadata.map(data => data.id)]}
