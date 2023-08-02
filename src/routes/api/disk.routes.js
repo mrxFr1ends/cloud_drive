@@ -5,6 +5,8 @@ import FileController from '../../controllers/FileContoller.js';
 import FolderController from '../../controllers/FolderController.js';
 import DownloadController from '../../controllers/DownloadController.js';
 import UploadController from '../../controllers/UploadController.js';
+import {validateMiddleware} from '../../middlewares/validateMiddleware.js';
+import * as rules from '../../validators/folder.validator.js';
 const diskRouter = new express.Router();
 
 // TODO: Написать валидаторы для названия папок и т.д.
@@ -20,10 +22,22 @@ diskRouter.get('/file/:id', asyncHandler(FileController.getOne));
 diskRouter.put('/file', asyncHandler(FileController.update));
 diskRouter.delete('/file/:id', asyncHandler(FileController.delete));
 
-diskRouter.post('/folder', asyncHandler(FolderController.create));
-diskRouter.get(['/folder', '/folder/:id'], asyncHandler(FolderController.getByIdOrToken));
-diskRouter.put('/folder', asyncHandler(FolderController.update));
-diskRouter.delete('/folder/:id', asyncHandler(FolderController.delete));
+diskRouter.post('/folder', 
+    validateMiddleware(rules.createFolderValidationRules), 
+    asyncHandler(FolderController.create)
+);
+diskRouter.get(['/folder', '/folder/:id'], 
+    validateMiddleware(rules.getFolderValidationRules), 
+    asyncHandler(FolderController.getByIdOrToken)
+);
+diskRouter.put('/folder', 
+    validateMiddleware(rules.updateFolderValidationRules), 
+    asyncHandler(FolderController.update)
+);
+diskRouter.delete('/folder/:id', 
+    validateMiddleware(rules.deleteFolderValidationRules), 
+    asyncHandler(FolderController.delete)
+);
 
 diskRouter.post('/upload/file', asyncHandler(UploadController.uploadFiles));
 diskRouter.post('/upload/folder', asyncHandler(UploadController.uploadFolder));
