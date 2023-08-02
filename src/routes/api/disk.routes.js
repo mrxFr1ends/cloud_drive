@@ -6,10 +6,9 @@ import FolderController from '../../controllers/FolderController.js';
 import DownloadController from '../../controllers/DownloadController.js';
 import UploadController from '../../controllers/UploadController.js';
 import { validateMiddleware } from '../../middlewares/validateMiddleware.js';
-import * as rules from '../../validators/folder.validator.js';
+import * as FolderRules from '../../validators/folder.validator.js';
+import * as FileRules from '../../validators/file.validator.js';
 const diskRouter = new express.Router();
-
-// TODO: Написать валидаторы для названия папок и т.д.
 
 diskRouter.use(asyncHandler(async (req, res, next) => {
     req.user = await UserService.getById(req.tokenData._id);
@@ -18,24 +17,33 @@ diskRouter.use(asyncHandler(async (req, res, next) => {
     next();
 }));
 
-diskRouter.get('/file/:id', asyncHandler(FileController.getOne));
-diskRouter.put('/file', asyncHandler(FileController.update));
-diskRouter.delete('/file/:id', asyncHandler(FileController.delete));
+diskRouter.get('/file/:id', 
+    validateMiddleware(FileRules.getFileValidationRules), 
+    asyncHandler(FileController.getOne)
+);
+diskRouter.put('/file', 
+    validateMiddleware(FileRules.updateFileValidationRules), 
+    asyncHandler(FileController.update)
+);
+diskRouter.delete('/file/:id', 
+    validateMiddleware(FileRules.deleteFileValidationRules), 
+    asyncHandler(FileController.delete)
+);
 
 diskRouter.post('/folder', 
-    validateMiddleware(rules.createFolderValidationRules), 
+    validateMiddleware(FolderRules.createFolderValidationRules), 
     asyncHandler(FolderController.create)
 );
 diskRouter.get(['/folder', '/folder/:id'], 
-    validateMiddleware(rules.getFolderValidationRules), 
+    validateMiddleware(FolderRules.getFolderValidationRules), 
     asyncHandler(FolderController.getByIdOrToken)
 );
 diskRouter.put('/folder', 
-    validateMiddleware(rules.updateFolderValidationRules), 
+    validateMiddleware(FolderRules.updateFolderValidationRules), 
     asyncHandler(FolderController.update)
 );
 diskRouter.delete('/folder/:id', 
-    validateMiddleware(rules.deleteFolderValidationRules), 
+    validateMiddleware(FolderRules.deleteFolderValidationRules), 
     asyncHandler(FolderController.delete)
 );
 
