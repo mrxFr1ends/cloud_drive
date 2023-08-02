@@ -1,5 +1,5 @@
 import Folder from '../models/Folder.js';
-import {FolderNotFoundError} from '../errors/index.js';
+import { FolderNotFoundError } from '../errors/index.js';
 
 class FolderService {
     async create(name, parentId, ownerId) {
@@ -7,36 +7,32 @@ class FolderService {
         return folder;
     }
 
-    async getById(id, userId) {
-        const folder = await Folder.findOne({ _id: id, ownerId: userId });
+    async getById(id, ownerId) {
+        const folder = await Folder.findOne({ _id: id, ownerId });
         if (!folder) throw new FolderNotFoundError();
         return folder;
     }
 
-    async getByParentId(parentId, userId, trashed) {
-        const folders = await Folder.find({ 
-            parentId, 
-            ownerId: userId ,
-            trashed
-        });
+    async getByParentId(parentId, trashed, ownerId) {
+        const folders = await Folder.find({ parentId, ownerId, trashed });
         return folders;
     }
 
-    async update(id, trashed, name, userId) {
-        const folder = await this.getById(id, userId);
+    async update(id, trashed, name, ownerId) {
+        const folder = await this.getById(id, ownerId);
 
-        if (folder.trashed !== trashed && trashed !== undefined) {
+        if (trashed !== undefined && folder.trashed !== trashed) {
             if (trashed) {
                 folder.set({
                     prevParentId: folder.parentId,
-                    parentId: userId,
+                    parentId: ownerId,
                     trashed: true
                 });
             }
             else {
                 const prevParentFolder = await this.getById(folder.prevParentId).then(folder => folder).catch(_ => null);
                 folder.set({
-                    parentId: prevParentFolder ? folder.prevParentId : userId,
+                    parentId: prevParentFolder ? folder.prevParentId : ownerId,
                     prevParentId: null,
                     trashed: false
                 });
