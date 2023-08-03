@@ -3,7 +3,7 @@ import FileService from "../services/FileService.js";
 class FileController {
     async getById(req, res) {
         const id = req.params.id;
-        const file = await FileService.getById(id);
+        const file = await FileService.getById(id, req.user._id);
         await file.linkMetadata();
         res.send({ file });
     }

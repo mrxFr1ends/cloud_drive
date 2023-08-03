@@ -41,6 +41,20 @@ class UserController {
 
         return res.json(getResponseWithToken(user));
     }
+
+    // async getByToken(req, res) {
+    //     const id = req.user._id;
+    //     const trashed = req.query.filter === "trashed";
+    //     res.send({
+    //         folder: await FolderService.getById(id, id),
+    //         subfolders: await FolderService.getByParentId(
+    //             id,
+    //             id,
+    //             trashed
+    //         ),
+    //         files: await FileService.getByParentId(id, id, trashed),
+    //     });
+    // }
 }
 
 export default new UserController();

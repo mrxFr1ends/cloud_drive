@@ -1,4 +1,4 @@
-import { FolderInTrashError, RootFolderError } from "../errors/index.js";
+import { FolderInTrashError } from "../errors/index.js";
 import FileService from "../services/FileService.js";
 import FolderService from "../services/FolderService.js";
 
@@ -41,21 +41,12 @@ class FolderController {
 
     async update(req, res) {
         const { id, trashed, name } = req.body;
-        if (id === req.user._id.toString()) throw new RootFolderError();
-
-        const updatedFolder = await FolderService.update(
-            id,
-            trashed,
-            name,
-            req.user._id
-        );
-        res.send({ folder: updatedFolder });
+        const folder = await FolderService.update(id, trashed, name, req.user._id);
+        res.send({ folder });
     }
 
     async deleteById(req, res) {
         const id = req.params.id;
-        if (id === req.user._id.toString()) throw new RootFolderError();
-
         await FolderService.deleteById(id, req.user._id);
         res.sendStatus(200);
     }

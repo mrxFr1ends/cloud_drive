@@ -6,8 +6,7 @@ import UploadController from "../../controllers/UploadController.js";
 import { asyncHandler } from "../../helpers/asyncHandler.js";
 import { validateMiddleware } from "../../middlewares/validateMiddleware.js";
 import UserService from "../../services/UserService.js";
-import * as FileRules from "../../validators/file.validator.js";
-import * as FolderRules from "../../validators/folder.validator.js";
+import * as ValidationRules from "../../validators/disk.validator.js";
 const diskRouter = new express.Router();
 
 diskRouter.use(
@@ -21,43 +20,43 @@ diskRouter.use(
 
 diskRouter.get(
     "/file/:id",
-    validateMiddleware(FileRules.getById),
+    validateMiddleware(ValidationRules.getById),
     asyncHandler(FileController.getById)
 );
 diskRouter.put(
     "/file",
-    validateMiddleware(FileRules.update),
+    validateMiddleware(ValidationRules.update),
     asyncHandler(FileController.update)
 );
 diskRouter.delete(
     "/file/:id",
-    validateMiddleware(FileRules.deleteById),
+    validateMiddleware(ValidationRules.deleteById),
     asyncHandler(FileController.deleteById)
 );
 
 diskRouter.post(
     "/folder",
-    validateMiddleware(FolderRules.create),
+    validateMiddleware(ValidationRules.create),
     asyncHandler(FolderController.create)
 );
 diskRouter.get(
     "/folder",
-    validateMiddleware(FolderRules.getByToken),
+    validateMiddleware(ValidationRules.getByToken),
     asyncHandler(FolderController.getByToken)
 );
 diskRouter.get(
     "/folder/:id",
-    validateMiddleware(FolderRules.getById),
+    validateMiddleware(ValidationRules.getById),
     asyncHandler(FolderController.getById)
 );
 diskRouter.put(
     "/folder",
-    validateMiddleware(FolderRules.update),
+    validateMiddleware(ValidationRules.update),
     asyncHandler(FolderController.update)
 );
 diskRouter.delete(
     "/folder/:id",
-    validateMiddleware(FolderRules.deleteById),
+    validateMiddleware(ValidationRules.deleteById),
     asyncHandler(FolderController.deleteById)
 );
 

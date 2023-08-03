@@ -1,4 +1,4 @@
-import { FolderInTrashError, FolderNotFoundError } from "../errors/index.js";
+import { FolderInTrashError, FolderNotFoundError, RootFolderError } from "../errors/index.js";
 import Folder from "../models/Folder.js";
 
 class FolderService {
@@ -35,6 +35,9 @@ class FolderService {
     }
 
     async update(id, trashed, name, ownerId) {
+        if (id === ownerId.toString())
+            throw new RootFolderError();
+
         const folder = await this.getById(id, ownerId);
 
         if (name !== undefined) {
@@ -64,6 +67,8 @@ class FolderService {
     }
 
     async deleteById(id, ownerId) {
+        if (id === ownerId.toString())
+            throw new RootFolderError();
         const folder = await this.getById(id, ownerId);
         await folder.deleteOne();
     }
