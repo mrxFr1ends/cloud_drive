@@ -18,9 +18,8 @@ class FolderController {
 
     async getById(req, res) {
         const id = req.params.id;
-        const folder = await FolderService.getById(id, req.user._id);
         res.send({
-            folder,
+            folder: await FolderService.getById(id, req.user._id),
             subfolders: await FolderService.getByParentId(id, req.user._id),
             files: await FileService.getByParentId(id, req.user._id),
         });
