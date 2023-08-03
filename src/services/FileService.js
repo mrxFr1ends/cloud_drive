@@ -19,19 +19,21 @@ class FileService {
         return file;
     }
 
-    async getManyById(ids, ownerId, metadata = true) {
+    async getManyById(ids, ownerId, metadata=true) {
         let query = File
             .find({ _id: { $in: ids }, ownerId })
             .linkMetadata(metadata);
         return await query.exec();
     }
 
-    async getByParentId(parentId, ownerId, trashed = false, metadata = true) {
-        const queryParams = { parentId, ownerId };
-        if (trashed) queryParams.trashed = true;
-
-        let query = File.find(queryParams).linkMetadata(metadata);
+    async getByParentId(parentId, ownerId, trashed, metadata=true) {
+        const query = File.find({ parentId, ownerId, trashed }).linkMetadata(metadata);
         return await query.exec();
+    }
+
+    async getFiltered(parentId, ownerId, filterOption) {
+        const files = await File.find({ parentId, ownerId, ...filterOption });
+        return files;
     }
 
     async #updateName(file, name) {

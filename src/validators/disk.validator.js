@@ -1,60 +1,69 @@
 import { body, param, query } from "express-validator";
 
-export const create = [
-    body("name")
-        .trim()
+const typeValidationRules = (place) =>
+    place("type")
         .exists()
-        .notEmpty()
-        .withMessage("name is required")
-        .not()
-        .matches(/[\t\n\r\x0b\x0c]+/)
-        .withMessage("name contains invalid characters"),
-    body("parentId", "Incorrect parentId")
+        .withMessage("type is required")
+        .isIn(["file", "folder"])
+        .withMessage('type must be "file" or "folder"');
+
+const idValidationRules = (place, name) => 
+    place(name)
         .exists()
-        .withMessage("parentId is required")
+        .withMessage(`${name} is required`)
         .isMongoId()
-        .withMessage("parentId must be MongoId"),
+        .withMessage(`${name} must be MongoId`);
+
+const nameValidationRules = (required) => {
+    const rules = [ 
+        body('name')
+            .optional()
+            .trim()
+            .notEmpty()
+            .withMessage("name cannot be empty")
+            .not()
+            .matches(/[\t\n\r\x0b\x0c]+/)
+            .withMessage("name contains invalid characters")
+    ];
+    if (required) {
+        rules.unshift(
+            body('name')
+                .exists()
+                .withMessage("name is required")
+        )
+    }
+    return rules;
+}
+
+export const create = [
+    ...nameValidationRules(true),
+    idValidationRules(body, 'parentId'),
+    typeValidationRules(body),
 ];
 
-export const getByToken = [
+export const getRoot = [
     query("filter")
         .optional()
-        .equals("trashed")
-        .withMessage('filter must be equal to "trashed"'),
+        .isIn(["trashed", "all"])
+        .withMessage('filter must be equal "trashed" or "all"'),
 ];
 
 export const getById = [
-    param("id")
-        .exists()
-        .withMessage("id is required")
-        .isMongoId()
-        .withMessage("id must be MongoId"),
+    idValidationRules(param, 'id'),
+    typeValidationRules(query)
 ];
 
-export const update = [
-    body("id")
-        .exists()
-        .withMessage("id is required")
-        .isMongoId()
-        .withMessage("id must be MongoId"),
+export const updateById = [
+    idValidationRules(body, 'id'),
     body("trashed")
         .optional()
         .isBoolean({ strict: true })
         .withMessage("trashed must be boolean"),
-    body("name")
-        .optional()
-        .trim()
-        .notEmpty()
-        .withMessage("name cannot be empty")
-        .not()
-        .matches(/[\t\n\r\x0b\x0c]+/)
-        .withMessage("name contains invalid characters"),
+    ...nameValidationRules(false),
+    typeValidationRules(body)
 ];
 
 export const deleteById = [
-    param("id")
-        .exists()
-        .withMessage("id is required")
-        .isMongoId()
-        .withMessage("id must be MongoId"),
+    idValidationRules(param, 'id'),
+    typeValidationRules(query)
 ];

@@ -1,63 +1,36 @@
 import express from "express";
+import DiskController from "../../controllers/DiskController.js";
 import DownloadController from "../../controllers/DownloadController.js";
-import FileController from "../../controllers/FileController.js";
-import FolderController from "../../controllers/FolderController.js";
 import UploadController from "../../controllers/UploadController.js";
 import { asyncHandler } from "../../helpers/asyncHandler.js";
 import { validateMiddleware } from "../../middlewares/validateMiddleware.js";
-import UserService from "../../services/UserService.js";
 import * as ValidationRules from "../../validators/disk.validator.js";
 const diskRouter = new express.Router();
 
-diskRouter.use(
-    asyncHandler(async (req, res, next) => {
-        req.user = await UserService.getById(req.tokenData._id);
-        if (!req.user)
-            return res.status(404).send({ message: "User not found" });
-        next();
-    })
-);
-
-diskRouter.get(
-    "/file/:id",
-    validateMiddleware(ValidationRules.getById),
-    asyncHandler(FileController.getById)
-);
-diskRouter.put(
-    "/file",
-    validateMiddleware(ValidationRules.update),
-    asyncHandler(FileController.update)
-);
-diskRouter.delete(
-    "/file/:id",
-    validateMiddleware(ValidationRules.deleteById),
-    asyncHandler(FileController.deleteById)
-);
-
 diskRouter.post(
-    "/folder",
+    "/",
     validateMiddleware(ValidationRules.create),
-    asyncHandler(FolderController.create)
+    asyncHandler(DiskController.create)
 );
 diskRouter.get(
-    "/folder",
-    validateMiddleware(ValidationRules.getByToken),
-    asyncHandler(FolderController.getByToken)
+    "/",
+    validateMiddleware(ValidationRules.getRoot),
+    asyncHandler(DiskController.getRoot)
 );
 diskRouter.get(
-    "/folder/:id",
+    "/:id",
     validateMiddleware(ValidationRules.getById),
-    asyncHandler(FolderController.getById)
+    asyncHandler(DiskController.getById)
 );
 diskRouter.put(
-    "/folder",
-    validateMiddleware(ValidationRules.update),
-    asyncHandler(FolderController.update)
+    "/",
+    validateMiddleware(ValidationRules.updateById),
+    asyncHandler(DiskController.updateById)
 );
 diskRouter.delete(
-    "/folder/:id",
+    "/:id",
     validateMiddleware(ValidationRules.deleteById),
-    asyncHandler(FolderController.deleteById)
+    asyncHandler(DiskController.deleteById)
 );
 
 diskRouter.post("/upload/file", asyncHandler(UploadController.uploadFiles));

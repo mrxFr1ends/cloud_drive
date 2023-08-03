@@ -22,11 +22,13 @@ class FolderService {
         return folder;
     }
 
-    async getByParentId(parentId, ownerId, trashed = false) {
-        const query = { parentId, ownerId };
-        if (trashed) query[trashed] = true;
+    async getByParentId(parentId, trashed, ownerId) {
+        const folders = await Folder.find({ parentId, ownerId, trashed });
+        return folders;
+    }
 
-        const folders = await Folder.find(query);
+    async getFiltered(parentId, ownerId, filterOption) {
+        const folders = await Folder.find({ parentId, ownerId, ...filterOption });
         return folders;
     }
 

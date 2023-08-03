@@ -17,7 +17,7 @@ const passwordRule = body('password', "Password must be greater than 8 and conta
         minSymbols: 1
     });
 
-export const loginValidationRules = [
+export const login = [
     body('login').custom(async (_, { req }) => {
         return oneOf([
             usernameRule('login'),
@@ -32,7 +32,7 @@ export const loginValidationRules = [
     passwordRule
 ];
 
-export const registerValidationRules = [
+export const register = [
     usernameRule('username'),
     emailRule('email'),
     passwordRule
