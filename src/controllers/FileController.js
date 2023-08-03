@@ -5,7 +5,7 @@ class FileController {
         res.send("Create empty file");
     }
 
-    async getOne(req, res) {
+    async getById(req, res) {
         const id = req.params.id;
         const file = await FileService.getById(id);
         res.send({ file });
@@ -17,7 +17,7 @@ class FileController {
         res.send({ file: updatedFile });
     }
 
-    async delete(req, res) {
+    async deleteById(req, res) {
         const id = req.params.id;
         await FileService.deleteById(id, req.user._id);
         res.sendStatus(200);

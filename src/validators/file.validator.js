@@ -1,12 +1,12 @@
 import { body, param } from "express-validator";
 
-export const getFileValidationRules = [
+export const getById = [
     param("id")
         .optional()
         .isMongoId().withMessage("id must be MongoId")
 ];
 
-export const updateFileValidationRules = [
+export const update = [
     body("id")
         .exists().withMessage("id is required")
         .isMongoId().withMessage("id must be MongoId"),
@@ -20,7 +20,7 @@ export const updateFileValidationRules = [
         .not().matches(/[\t\n\r\x0b\x0c]+/).withMessage("name contains invalid characters")
 ];
 
-export const deleteFileValidationRules = [
+export const deleteById = [
     param("id")
         .exists().withMessage("id is required")
         .isMongoId().withMessage("id must be MongoId")

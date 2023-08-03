@@ -21,18 +21,18 @@ diskRouter.use(
 
 diskRouter.get(
     "/file/:id",
-    validateMiddleware(FileRules.getFileValidationRules),
-    asyncHandler(FileController.getOne)
+    validateMiddleware(FileRules.getById),
+    asyncHandler(FileController.getById)
 );
 diskRouter.put(
     "/file",
-    validateMiddleware(FileRules.updateFileValidationRules),
+    validateMiddleware(FileRules.update),
     asyncHandler(FileController.update)
 );
 diskRouter.delete(
     "/file/:id",
-    validateMiddleware(FileRules.deleteFileValidationRules),
-    asyncHandler(FileController.delete)
+    validateMiddleware(FileRules.deleteById),
+    asyncHandler(FileController.deleteById)
 );
 
 diskRouter.post(
