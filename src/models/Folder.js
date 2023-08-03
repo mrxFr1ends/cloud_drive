@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import File from './File.js';
+import { Bucket } from '../helpers/bucketHelper.js';
 
 const FolderSchema = new mongoose.Schema({
     name: {
@@ -64,11 +65,8 @@ FolderSchema.pre('deleteOne', { document: true }, async function(next) {
     await File.find({ parentId: this.id, trashed: this.trashed }).then(files => {
         if (files.length === 0)
             return;
-        const bucket = new mongoose.mongo.GridFSBucket(mongoose.connection.db, {        
-            bucketName: 'files'
-        });
         return Promise.all(files.map(async (file) => {
-            await bucket.delete(file.metadata)
+            await Bucket.delete(file.metadata)
             console.log('delete file', file.id);
             await file.deleteOne();
         }));

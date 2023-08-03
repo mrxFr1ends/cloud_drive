@@ -1,7 +1,7 @@
-import mongoose from 'mongoose';
 import stream from 'stream';
-import FolderService from '../services/FolderService.js';
+import { Bucket } from '../helpers/bucketHelper.js';
 import FileService from '../services/FileService.js';
+import FolderService from '../services/FolderService.js';
 
 class UploadController {
     async uploadFiles(req, res) {
@@ -10,14 +10,11 @@ class UploadController {
 
         const { body: { folderId }, files: { uploadedFiles } } = req;
         await FolderService.getById(folderId, req.user._id);
-        const bucket = new mongoose.mongo.GridFSBucket(mongoose.connection.db, {
-            bucketName: 'files'
-        });
-    
+
         const uploadFile = (file) => new Promise((resolve, reject) => {
             const readStream = stream.PassThrough();
             readStream.end(file.data); 
-            const uploadStream = bucket.openUploadStream(file.name);
+            const uploadStream = Bucket.openUploadStream(file.name);
             readStream.pipe(uploadStream);
 
             uploadStream.on('finish', async () => {

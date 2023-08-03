@@ -1,7 +1,7 @@
-import mongoose from "mongoose";
 import { FileInTrashError, FileNotFoundError } from "../errors/index.js";
 import File from "../models/File.js";
 import FolderService from "./FolderService.js";
+import { Bucket } from "../helpers/bucketHelper.js";
 
 class FileService {
     async create(parentId, metadataId, ownerId) {
@@ -14,29 +14,35 @@ class FileService {
     }
 
     async getById(id, ownerId, metadata = true) {
-        const file = File.findOne({ _id: id, ownerId });
-        if (metadata) file.populate("metadata", "-_id -chunkSize");
-        if (!(await file)) throw new FileNotFoundError();
+        let query = File.findOne({ _id: id, ownerId });
+        if (metadata) query.populate("metadata", "-_id -chunkSize");
+        const file = await query.exec();
+        if (!file) throw new FileNotFoundError();
         return file;
+    }
+    
+    async getManyById(ids, ownerId, metadata = true) {
+        let query = File.find({ _id: { $in: ids }, ownerId });
+        if (metadata) query = query.populate("metadata", "-_id -chunkSize");
+        return await query.exec();
     }
 
     async getByParentId(parentId, ownerId, trashed = false, metadata = true) {
-        const query = { parentId, ownerId };
-        if (trashed) query[trashed] = true;
+        const queryParams = { parentId, ownerId };
+        if (trashed) queryParams.trashed = true;
 
-        const files = File.find(query);
-        if (metadata) files.populate("metadata", "-_id -chunkSize");
-        return await files;
-    }
-
-    async getManyById(ids, ownerId, metadata = true) {
-        const files = File.find({ _id: { $in: ids }, ownerId });
-        if (metadata) files.populate("metadata", "-_id -chunkSize");
-        return await files;
+        let query = File.find(queryParams);
+        if (metadata) query = query.populate("metadata", "-_id -chunkSize");
+        return await query.exec();
     }
 
     async update(id, trashed, name, ownerId) {
         const file = await this.getById(id, ownerId);
+
+        if (name !== undefined) {
+            if (file.trashed) throw new FileInTrashError();
+            await Bucket.rename(file.metadata, name);
+        }
 
         if (trashed !== undefined && file.trashed !== trashed) {
             if (trashed) {
@@ -58,26 +64,12 @@ class FileService {
             }
         }
 
-        if (name !== undefined) {
-            if (file.trashed) throw new FileInTrashError();
-            const bucket = new mongoose.mongo.GridFSBucket(
-                mongoose.connection.db,
-                {
-                    bucketName: "files",
-                }
-            );
-            await bucket.rename(file.metadata, name);
-        }
-
         return await file.save();
     }
 
     async deleteById(id, ownerId) {
         const file = await this.getById(id, ownerId, false);
-        const bucket = new mongoose.mongo.GridFSBucket(mongoose.connection.db, {
-            bucketName: "files",
-        });
-        await bucket.delete(file.metadata);
+        await Bucket.delete(file.metadata);
         await file.deleteOne();
     }
 }

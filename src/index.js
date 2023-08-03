@@ -2,8 +2,9 @@ import express from 'express';
 import fileUpload from 'express-fileupload';
 import mongoose from 'mongoose';
 import apiRouter from './routes/api/index.js';
-import { PORT, DB_URL } from './config.js';
+import { PORT, DB_URL, BUCKET_NAME } from './config.js';
 import {serverErrorMiddleware} from './middlewares/serverErrorMiddleware.js';
+import { initBucket } from './helpers/bucketHelper.js';
 
 const app = express();
 app.use(express.json());
@@ -46,6 +47,8 @@ async function startApp() {
             useNewUrlParser: true,
             useUnifiedTopology: true,
         });
+        // Init bucket
+        initBucket(mongoose.connection.db, BUCKET_NAME);
         // Start server
         app.listen(PORT, () => {
             console.log(`Server is running on port ${PORT}`);

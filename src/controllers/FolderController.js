@@ -22,7 +22,7 @@ class FolderController {
         res.send({
             folder,
             subfolders: await FolderService.getByParentId(id, req.user._id),
-            files: await FileService.getByParentId(id, req.user._d),
+            files: await FileService.getByParentId(id, req.user._id),
         });
     }
 
@@ -30,13 +30,13 @@ class FolderController {
         const id = req.user._id;
         const trashed = req.query.filter === "trashed";
         res.send({
-            folder: await FolderService.getById(id, req.user._id),
+            folder: await FolderService.getById(id, id),
             subfolders: await FolderService.getByParentId(
                 id,
-                req.user._id,
+                id,
                 trashed
             ),
-            files: await FileService.getByParentId(id, req.user._d, trashed),
+            files: await FileService.getByParentId(id, id, trashed),
         });
     }
 

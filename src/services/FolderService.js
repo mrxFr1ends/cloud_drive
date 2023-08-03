@@ -37,6 +37,11 @@ class FolderService {
     async update(id, trashed, name, ownerId) {
         const folder = await this.getById(id, ownerId);
 
+        if (name !== undefined) {
+            if (folder.trashed) throw new FolderInTrashError();
+            folder.set({ name });
+        }
+
         if (trashed !== undefined && folder.trashed !== trashed) {
             if (trashed) {
                 folder.set({
@@ -53,11 +58,6 @@ class FolderService {
                     trashed: false,
                 });
             }
-        }
-
-        if (name !== undefined) {
-            if (folder.trashed) throw new FolderInTrashError();
-            folder.set({ name });
         }
 
         return await folder.save();
