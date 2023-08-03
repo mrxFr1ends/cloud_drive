@@ -1,5 +1,5 @@
-import Folder from '../models/Folder.js';
-import { FolderInTrashError, FolderNotFoundError } from '../errors/index.js';
+import { FolderInTrashError, FolderNotFoundError } from "../errors/index.js";
+import Folder from "../models/Folder.js";
 
 class FolderService {
     async create(name, parentId, ownerId) {
@@ -8,10 +8,10 @@ class FolderService {
     }
 
     async createRoot(ownerId) {
-        const folder = await Folder.create({ 
-            _id: ownerId, 
+        const folder = await Folder.create({
+            _id: ownerId,
             name: "root",
-            ownerId
+            ownerId,
         });
         return folder;
     }
@@ -22,9 +22,16 @@ class FolderService {
         return folder;
     }
 
-    async getByParentId(parentId, trashed, ownerId) {
-        const folders = await Folder.find({ parentId, ownerId, trashed });
+    async getByParentId(parentId, ownerId, trashed = false) {
+        const query = { parentId, ownerId };
+        if (trashed) query[trashed] = true;
+
+        const folders = await Folder.find(query);
         return folders;
+    }
+
+    async isExist(id, ownerId) {
+        return !(await Folder.findOne({ _id: id, ownerId }));
     }
 
     async update(id, trashed, name, ownerId) {
@@ -35,22 +42,21 @@ class FolderService {
                 folder.set({
                     prevParentId: folder.parentId,
                     parentId: ownerId,
-                    trashed: true
+                    trashed: true,
                 });
-            }
-            else {
-                const prevParentFolder = await this.getById(folder.prevParentId).then(folder => folder).catch(_ => null);
+            } else {
                 folder.set({
-                    parentId: prevParentFolder ? folder.prevParentId : ownerId,
+                    parentId: await this.isExist(folder.prevParentId, ownerId)
+                        ? folder.prevParentId
+                        : ownerId,
                     prevParentId: null,
-                    trashed: false
+                    trashed: false,
                 });
             }
-        } 
+        }
 
         if (name !== undefined) {
-            if (folder.trashed)
-                throw new FolderInTrashError();
+            if (folder.trashed) throw new FolderInTrashError();
             folder.set({ name });
         }
 
