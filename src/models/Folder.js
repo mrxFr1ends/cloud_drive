@@ -62,15 +62,14 @@ FolderSchema.pre('deleteOne', { document: true }, async function(next) {
             }))
         );
 
-    await File.find({ parentId: this.id, trashed: this.trashed }).then(files => {
-        if (files.length === 0)
-            return;
-        return Promise.all(files.map(async (file) => {
-            await Bucket.delete(file.metadata)
-            console.log('delete file', file.id);
-            await file.deleteOne();
-        }));
-    });
+    await File.find({ parentId: this.id, trashed: this.trashed })
+        .then(files => 
+            Promise.all(files.map(async (file) => {
+                await Bucket.delete(file.metadata)
+                console.log('delete file', file.id);
+                await file.deleteOne();
+            }))
+        );
 
     console.log('delete return', this.name);
     return next();

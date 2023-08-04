@@ -31,8 +31,8 @@ class DiskController {
         else
             res.send({
                 folder: diskObject,
-                subfolders: await FolderService.getByParentId(id, req.user._id, diskObject.trashed),
-                files: await FileService.getByParentId(id, req.user._id, diskObject.trashed),
+                subfolders: await FolderService.getByParentId(id, diskObject.trashed, req.user._id),
+                files: await FileService.getByParentId(id, diskObject.trashed, req.user._id),
             });
     }
 

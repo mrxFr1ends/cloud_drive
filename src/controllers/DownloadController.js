@@ -15,7 +15,7 @@ class DownloadController {
     async downloadFolder(req, res) {
         const id = req.params.id;
         const folder = await FolderService.getById(id, req.user._id);
-        const metadataIds = await FileService.getByParentId(id, req.user._id, false, false)
+        const metadataIds = await FileService.getByParentId(id, false, req.user._id, false)
             .then(files => files.map(file => file.metadata));
         const files = await Bucket.find({ _id: { $in: metadataIds } }).toArray();
             

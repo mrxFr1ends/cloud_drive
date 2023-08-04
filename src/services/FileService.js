@@ -19,14 +19,7 @@ class FileService {
         return file;
     }
 
-    async getManyById(ids, ownerId, metadata=true) {
-        let query = File
-            .find({ _id: { $in: ids }, ownerId })
-            .linkMetadata(metadata);
-        return await query.exec();
-    }
-
-    async getByParentId(parentId, ownerId, trashed, metadata=true) {
+    async getByParentId(parentId, trashed, ownerId, metadata=true) {
         const query = File.find({ parentId, ownerId, trashed }).linkMetadata(metadata);
         return await query.exec();
     }
@@ -76,7 +69,7 @@ class FileService {
     }
 
     async deleteById(id, ownerId) {
-        const file = await this.getById(id, ownerId, false);
+        const file = await this.getById(id, ownerId);
         await Bucket.delete(file.metadata);
         await file.deleteOne();
     }

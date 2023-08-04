@@ -21,7 +21,7 @@ class UploadController {
                 try {
                     resolve(await FileService.create(
                         folderId, uploadStream.id, req.user._id
-                    ));
+                    ).then(file => file.linkMetadata()));
                 }
                 catch (err) { reject(err); }
             });
@@ -31,11 +31,9 @@ class UploadController {
 
         const files = (Array.isArray(uploadedFiles) 
             ? await Promise.all(uploadedFiles.map(file => uploadFile(file)))
-            : [await uploadFile(uploadedFiles)])
+            : [await uploadFile(uploadedFiles)]);
 
-        res.status(201).send({ 
-            files: await FileService.getManyById(files.map(file => file.id), req.user._id) 
-        });
+        res.status(201).send({ files });
     }
 
     async uploadFolder(req, res) {
