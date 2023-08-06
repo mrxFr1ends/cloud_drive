@@ -25,7 +25,7 @@ class FileService {
     }
 
     async getFiltered(parentId, ownerId, filterOption) {
-        const files = await File.find({ parentId, ownerId, ...filterOption });
+        const files = await File.find({ parentId, ownerId, ...filterOption }).linkMetadata(true);
         return files;
     }
 

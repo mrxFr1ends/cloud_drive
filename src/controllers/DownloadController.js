@@ -21,7 +21,6 @@ class DownloadController {
             
         res.set("Content-Type", "application/zip");
         res.set("Content-Disposition", `attachment; filename=${folder.name}.zip`);
-        res.set("Access-Control-Allow-Origin", "*");
 
         const archive = archiver("zip", { zlib: { level: 9 } });
         archive.pipe(res);

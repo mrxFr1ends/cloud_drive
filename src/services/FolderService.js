@@ -67,7 +67,7 @@ class FolderService {
 
         return await folder.save();
     }
-
+    
     async deleteById(id, ownerId) {
         if (id === ownerId.toString())
             throw new RootFolderError();

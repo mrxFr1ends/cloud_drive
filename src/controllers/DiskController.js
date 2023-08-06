@@ -43,7 +43,8 @@ class DiskController {
         if (filter == undefined || filter === "trashed")
             filterOption.trashed = req.query.filter === "trashed";
         res.send({ 
-            folders: await FolderService.getFiltered(id, id, filterOption),
+            folder: await FolderService.getById(id, id),
+            subfolders: await FolderService.getFiltered(id, id, filterOption),
             files: await FileService.getFiltered(id, id, filterOption)
         });
     }

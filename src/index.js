@@ -2,11 +2,16 @@ import express from 'express';
 import fileUpload from 'express-fileupload';
 import mongoose from 'mongoose';
 import apiRouter from './routes/api/index.js';
-import { PORT, DB_URL, BUCKET_NAME } from './config.js';
+import { PORT, DB_URL, BUCKET_NAME, CLIENT_URL } from './config.js';
 import {serverErrorMiddleware} from './middlewares/serverErrorMiddleware.js';
 import { initBucket } from './helpers/bucketHelper.js';
+import cors from "cors";
 
 const app = express();
+app.use(cors({
+    credentials: true,
+    origin: CLIENT_URL
+}));
 app.use(express.json());
 app.use(fileUpload());
 app.use('/api', apiRouter);

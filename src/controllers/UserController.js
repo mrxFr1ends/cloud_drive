@@ -7,7 +7,7 @@ const getResponseWithToken = user => {
     return {
         token: generateAuthToken(user),
         user: {
-            _id: user._id,
+            id: user._id,
             username: user.username,
             email: user.email,
             diskSpace: user.diskSpace,
@@ -47,6 +47,10 @@ class UserController {
                 .json({ message: "Incorrect email, username or password" });
 
         return res.json(getResponseWithToken(user));
+    }
+
+    async auth(req, res) {
+        return res.json(getResponseWithToken(req.user));
     }
 }
 
