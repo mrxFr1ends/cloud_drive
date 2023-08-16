@@ -32,8 +32,8 @@ class FolderService {
         return folders;
     }
 
-    async isExist(id, ownerId) {
-        return !(await Folder.findOne({ _id: id, ownerId }));
+    async isExist(id, ownerId, trashed) {
+        return !!(await Folder.findOne({ _id: id, ownerId, trashed }));
     }
 
     async update(id, trashed, name, ownerId) {
@@ -56,7 +56,7 @@ class FolderService {
                 });
             } else {
                 folder.set({
-                    parentId: await this.isExist(folder.prevParentId, ownerId)
+                    parentId: await this.isExist(folder.prevParentId, ownerId, false)
                         ? folder.prevParentId
                         : ownerId,
                     prevParentId: null,

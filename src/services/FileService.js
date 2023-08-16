@@ -43,7 +43,8 @@ class FileService {
         else {
             const parentFolderIsExist = await FolderService.isExist(
                 file.prevParentId,
-                ownerId
+                ownerId,
+                false
             );
             file.set({
                 parentId: parentFolderIsExist ? file.prevParentId : ownerId,
