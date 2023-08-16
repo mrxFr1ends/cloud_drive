@@ -13,7 +13,9 @@ app.use(cors({
     origin: CLIENT_URL
 }));
 app.use(express.json());
-app.use(fileUpload());
+app.use(fileUpload({
+    defParamCharset: 'utf8'
+}));
 app.use('/api', apiRouter);
 app.use(serverErrorMiddleware);
 
@@ -44,6 +46,9 @@ app.use(serverErrorMiddleware);
 // TODO: в deleteMany Folder вызывать deleteOne Folder
 // TODO: в deleteOne Folder вызывать deleteMany по parentId у Folder и File.
 // TODO: это удобно т.к. удаление файла можно сделать просто как file.deleteOne и знать что 100% metadata так же удалится
+
+// TODO: Написать тесты. Перепроверить работу validateMiddleware. Возможно что-то своё придумать для фильтрации данных
+// TODO: и возможно все таки найти что-то. Ошибку может стоит возвращать. Не знаю пока.
 
 async function startApp() {
     try {
