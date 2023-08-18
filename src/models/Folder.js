@@ -52,8 +52,6 @@ FolderSchema.pre('save', async function(next) {
 });
 
 FolderSchema.pre('deleteOne', { document: true }, async function(next) {
-    console.log('deleteOne', this.name);
-    
     await Folder.find({ parentId: this.id, trashed: this.trashed })
         .then(folders => 
             Promise.all(folders.map(async (folder) => {
@@ -70,8 +68,7 @@ FolderSchema.pre('deleteOne', { document: true }, async function(next) {
                 await file.deleteOne();
             }))
         );
-
-    console.log('delete return', this.name);
+        
     return next();
 });
 
