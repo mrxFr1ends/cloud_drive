@@ -3,7 +3,7 @@ import { oneOf, body } from 'express-validator';
 const usernameRule = (field) => body(field, "Incorrect username")
     .exists().withMessage("Username is required")
     .isLength({min: 6, max: 20}).withMessage("Username must be at least 6 characters and more than 20 characters")
-    .isAlpha().withMessage("Username can contain only latin alpha characters");
+    .matches(/^[A-Za-z0-9-_]+$/).withMessage("Username can contain only letters, numbers and '-_'");
 
 const emailRule = (field) => body(field, "Incorrect email")
     .isEmail();
